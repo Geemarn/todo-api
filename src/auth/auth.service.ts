@@ -64,6 +64,7 @@ export class AuthService {
       data: {
         ...validatedPayload.user.toObject(),
         auth: {
+          _id: validatedPayload.auth._id,
           email: validatedPayload.auth.email,
         },
       },
@@ -108,6 +109,7 @@ export class AuthService {
       data: {
         ...user.toObject(),
         auth: {
+          _id: auth._id,
           email: auth.email,
         },
       },
