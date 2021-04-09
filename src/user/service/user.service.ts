@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document } from 'mongoose';
-import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../interfaces/user.interfaces';
 
 @Injectable()
@@ -16,14 +15,6 @@ export class UserService {
    */
   public async create(obj: any) {
     return this.userModel.create(obj);
-  }
-
-  /**
-   * @param {CreateUserDto} createUserDto: The payload object
-   * @return {Object} returns found user
-   */
-  public async getUser(createUserDto: CreateUserDto): Promise<User> {
-    return this.userModel.findOne({ userId: createUserDto.userId });
   }
 
   /**

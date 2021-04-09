@@ -1,7 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
-import { Model, Document } from 'mongoose';
+import { Document, Model } from 'mongoose';
 import { User } from '../user/interfaces/user.interfaces';
 import { Auth } from './interfaces/auth.interfaces';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -46,7 +46,7 @@ export class AuthService {
    * @param {SignInDto} signInDto: SignUpDto gotten from payload
    * @return {Object} returns an access token
    */
-  async signIn(signInDto): Promise<any> {
+  async signIn(signInDto: SignInDto): Promise<any> {
     const validatedPayload: any = await this.validate(
       signInDto.email,
       signInDto.password,
@@ -56,10 +56,16 @@ export class AuthService {
       sub: validatedPayload.user.userId,
     };
     return {
-      ...validatedPayload.user.toObject(),
-      auth: {
+      meta: {
+        code: 200,
+        success: true,
         token: this.jwt.sign(signInPayload),
-        email: validatedPayload.auth.email,
+      },
+      data: {
+        ...validatedPayload.user.toObject(),
+        auth: {
+          email: validatedPayload.auth.email,
+        },
       },
     };
   }
@@ -68,7 +74,7 @@ export class AuthService {
    * @param {SignUpDto} signUpDto: SignUpDto gotten from payload
    * @return {Object} returns a saved auth object
    */
-  async signUp(signUpDto): Promise<any> {
+  async signUp(signUpDto: SignUpDto): Promise<any> {
     let auth = await this.authModel.findOne({ email: signUpDto.email });
     if (auth) {
       throw ErrorException.USER_EXIST;
@@ -94,10 +100,16 @@ export class AuthService {
     });
 
     return {
-      ...user.toObject(),
-      auth: {
+      meta: {
+        code: 200,
+        success: true,
         token,
-        email: auth.email,
+      },
+      data: {
+        ...user.toObject(),
+        auth: {
+          email: auth.email,
+        },
       },
     };
   }
@@ -110,12 +122,10 @@ export class AuthService {
     const decoded = this.jwt.verify(token, {
       secret: jwtSecret,
     });
-    const user = await this.userService.getUserByEmail(decoded.email);
-    return user;
+    return await this.userService.getUserByEmail(decoded.email);
   }
 
   public async getAuths(): Promise<Auth[]> {
-    const auths = await this.authModel.find();
-    return auths;
+    return this.authModel.find();
   }
 }

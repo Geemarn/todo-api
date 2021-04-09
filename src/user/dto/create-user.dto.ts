@@ -1,4 +1,3 @@
-import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, IsEmail } from 'class-validator';
 
 export class CreateUserDto {
@@ -7,14 +6,9 @@ export class CreateUserDto {
   readonly email: string;
 
   @IsString()
-  @IsOptional()
-  readonly userId: string;
-
-  @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   readonly firstName: string;
 
-  @IsString()
   @IsOptional()
   readonly lastName: string;
 
