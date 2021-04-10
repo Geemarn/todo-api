@@ -9,6 +9,8 @@ import {
   Res,
   Param,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { Request, Response } from 'express';
@@ -22,33 +24,35 @@ export class TodoController {
   constructor(private todoService: TodoService) {}
 
   @Get()
-  // findAll(@Req() req: Request, @Res() res: Response): Response {
-  //   return res.send('welcome express');
-  // }
-  findAll(): Promise<Todo[]> {
-    return this.todoService.findAll();
+  @HttpCode(HttpStatus.OK)
+  findAll(@Req() req: Request): Promise<Todo[]> {
+    return this.todoService.findAll(req.user);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Todo> {
-    return this.todoService.findOne(id);
+  findOne(@Param('id') id: string, @Req() req: Request): Promise<Todo> {
+    return this.todoService.findOne(id, req.user);
   }
 
   @Post()
-  create(@Body() createTodoDto: CreateTodoDto): Promise<Todo> {
-    return this.todoService.create(createTodoDto);
+  create(
+    @Body() createTodoDto: CreateTodoDto,
+    @Req() req: Request,
+  ): Promise<Todo> {
+    return this.todoService.create(createTodoDto, req.user);
   }
 
   @Put(':id')
   update(
     @Body() updateTodoDto: CreateTodoDto,
     @Param('id') id: string,
+    @Req() req: Request,
   ): Promise<Todo> {
-    return this.todoService.update(id, updateTodoDto);
+    return this.todoService.update(id, updateTodoDto, req.user);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string): Promise<Todo> {
-    return this.todoService.delete(id);
+  delete(@Param('id') id: string, @Req() req: Request): Promise<Todo> {
+    return this.todoService.delete(id, req.user);
   }
 }
