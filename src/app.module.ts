@@ -7,6 +7,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import config from './config/keys';
 import { UserModule } from './user/user.module';
+import { TaskService } from './task/task.service';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -14,6 +16,7 @@ import { UserModule } from './user/user.module';
     MongooseModule.forRoot(config.mongoURI),
     AuthModule,
     UserModule,
+    TaskModule,
     // GraphQLModule.forRoot({
     //   autoSchemaFile: true,
     // }),

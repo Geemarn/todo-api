@@ -1,42 +1,105 @@
-import { TodoModule } from './todo.module';
 import { Injectable } from '@nestjs/common';
 import { Todo } from './interfaces/todo.interfaces';
 import { Model, Document } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from 'src/user/interfaces/user.interfaces';
+import { Task } from 'src/task/interfaces/task.interfaces';
 
 @Injectable()
 export class TodoService {
   constructor(
-    @InjectModel('Todo') private readonly itemModel: Model<Todo & Document>,
+    @InjectModel('Todo') private readonly todoModel: Model<Todo & Document>,
+    @InjectModel('Task') private readonly taskModel: Model<Task & Document>,
   ) {}
 
   async findAll(user): Promise<Todo[]> {
-    return this.itemModel.find({ userId: user._id });
+    return this.todoModel.find({ userId: user._id });
   }
 
-  async findOne(id: string, user): Promise<Todo> {
-    return this.itemModel.findOne({ _id: id, userId: user._id });
+  async findOne(todoId: string, user): Promise<Todo> {
+    return this.todoModel.findOne({ _id: todoId, userId: user._id });
   }
 
-  async create(todo: Todo, user): Promise<Todo> {
+  async create(todo, user): Promise<Todo> {
     const userPayload = {
       ...todo,
       userId: user._id,
     };
-    const newItem = new this.itemModel(userPayload);
-    return await newItem.save();
+    const newTodo = new this.todoModel(userPayload);
+    return await newTodo.save();
   }
 
-  async update(id: string, item: Todo, user): Promise<Todo> {
-    return this.itemModel.findOneAndUpdate(
-      { _id: id, userId: user._id },
-      item,
+  async update(todoId: string, todo, user): Promise<Todo> {
+    return this.todoModel.findOneAndUpdate(
+      { _id: todoId, userId: user._id },
+      todo,
       { new: true },
     );
   }
 
-  async delete(id: string, user): Promise<Todo> {
-    return this.itemModel.findByIdAndDelete({ _id: id, userId: user._id });
+  async delete(todoId: string, user): Promise<Todo> {
+    return this.todoModel.findByIdAndDelete({ _id: todoId, userId: user._id });
+  }
+
+  async findAllTasksByTodo(todoId, user): Promise<Task[]> {
+    const todo = await this.todoModel.findOne({
+      _id: todoId,
+      userId: user._id,
+    });
+    return todo.tasks;
+  }
+
+  async createTaskByTodo(createTaskDto, todoId, user): Promise<Task> {
+    const taskPayload = {
+      ...createTaskDto,
+      userId: user._id,
+    };
+    const newTask = await this.taskModel.create(taskPayload);
+    await this.todoModel.updateOne(
+      { _id: todoId, userId: user._id },
+      { $push: { tasks: newTask } },
+    );
+    return newTask;
+  }
+
+  async updateTaskByTodo(task, todoId, taskId, user): Promise<Task> {
+    const updatedTask = await this.taskModel.findOneAndUpdate(
+      { _id: taskId, userId: user._id },
+      task,
+      { new: true },
+    );
+    // const result = await this.todoModel.findOneAndUpdate(
+    //   { _id: todoId, userId: user._id, tasks: { $elemMatch: { _id: taskId } } },
+    //   { $set: { 'tasks.$.description': 'hello world' } },
+    //   { 'new': true }
+    // );
+    const todo: any = await this.findOne(todoId, user);
+    todo.tasks = todo.tasks.map((task) => {
+      if (String(taskId) === String(task._id)) {
+        return updatedTask;
+      }
+      return task;
+    });
+    todo.save();
+
+    return updatedTask;
+  }
+
+  async deleteTaskByTodo(todoId, taskId, user): Promise<Task> {
+    const deletedTask: Task = await this.taskModel.findOneAndDelete({
+      _id: taskId,
+      userId: user._id,
+    });
+    const todo: any = await this.findOne(todoId, user);
+    todo.tasks = todo.tasks.filter(
+      (task) => String(taskId) !== String(task._id),
+    );
+    todo.save();
+
+    return deletedTask;
+  }
+
+  async findTaskByTodo(todoId, taskId, user): Promise<Task> {
+    const todo: any = await this.findOne(todoId, user);
+    return todo.tasks.find((task) => String(taskId) === String(task._id));
   }
 }

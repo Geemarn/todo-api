@@ -16,14 +16,17 @@ import { UserSchema } from 'src/user/entity/user.entity';
   imports: [
     HttpModule,
     UserModule,
-    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }, { name: 'Auth', schema: AuthSchema }]),
+    MongooseModule.forFeature([
+      { name: 'User', schema: UserSchema },
+      { name: 'Auth', schema: AuthSchema },
+    ]),
     PassportModule.register({
       defaultStrategy: 'jwt',
       property: 'auth',
     }),
     JwtModule.register({
       secret: jwtSecret,
-      signOptions: { expiresIn: '3600s' },
+      signOptions: { expiresIn: '7200s' },
     }),
   ],
   controllers: [AuthController],

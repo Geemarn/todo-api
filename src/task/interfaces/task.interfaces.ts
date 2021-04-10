@@ -1,10 +1,7 @@
 import { User } from 'src/user/interfaces/user.interfaces';
-import { Task } from '../../task/interfaces/task.interfaces';
 
-export class Todo {
+export class Task {
   id?: string;
-  name: string;
   description?: string;
   userId?: User;
-  tasks: [Task];
 }
