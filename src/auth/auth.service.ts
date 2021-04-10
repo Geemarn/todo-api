@@ -56,11 +56,7 @@ export class AuthService {
       sub: validatedPayload.user.userId,
     };
     return {
-      meta: {
-        code: 200,
-        success: true,
-        token: this.jwt.sign(signInPayload),
-      },
+      token: this.jwt.sign(signInPayload),
       data: {
         ...validatedPayload.user.toObject(),
         auth: {
@@ -101,11 +97,7 @@ export class AuthService {
     });
 
     return {
-      meta: {
-        code: 200,
-        success: true,
-        token,
-      },
+      token,
       data: {
         ...user.toObject(),
         auth: {

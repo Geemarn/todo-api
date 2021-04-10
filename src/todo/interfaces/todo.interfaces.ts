@@ -5,6 +5,7 @@ export class Todo {
   id?: string;
   name: string;
   description?: string;
+  status: string;
   userId?: User;
   tasks: [Task];
 }

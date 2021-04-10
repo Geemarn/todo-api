@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
+import { Todo } from 'src/todo/entity/todo.entity';
 import { User } from 'src/user/entity/user.entity';
 
 @Schema({
@@ -18,6 +19,12 @@ export class Task {
     ref: 'User',
   })
   userId: User;
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Todo',
+  })
+  todoId: Todo;
 }
 
 const TaskSchema = SchemaFactory.createForClass(Task);
